@@ -1,675 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>My GitHub Page</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
-<style>
-  :root {
-    --bg: #0d0d0f;
-    --surface: #141417;
-    --surface2: #1c1c21;
-    --border: #2a2a32;
-    --accent: #7c6aff;
-    --accent2: #ff6ac1;
-    --text: #e8e8f0;
-    --text-muted: #6b6b80;
-    --green: #4ade80;
-    --red: #f87171;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seralyth Macros</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    <style>
+        body { background-color: #080a0c; color: #ffffff; font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+        
+        .macro-card, .request-card { 
+            background-color: #121519; 
+            border: 1px solid #2d3136; 
+            transition: all 0.2s ease-in-out;
+            border-radius: 14px;
+        }
+        .macro-card:hover, .request-card:hover { 
+            background-color: #1a1e24; 
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+        .modal-blur { backdrop-filter: blur(12px); }
+        .modal-content { background-color: #0f1216; border-radius: 20px; border: 1px solid #374151; }
+        
+        pre[class*="language-"] { 
+            margin: 0; 
+            background: #050608 !important; 
+            font-size: 0.95rem; 
+            border-radius: 10px;
+            padding: 1.5rem !important;
+            border: 1px solid #1f2937;
+        }
+        
+        .video-container, .form-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .video-container { padding-bottom: 56.25%; height: 0; }
+        .video-container iframe, .form-container iframe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .form-container { height: 75vh; }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(124,106,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,106,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+        [v-cloak] { display: none; }
 
-  header {
-    position: sticky; top: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 40px;
-    background: rgba(13,13,15,0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
+        /* Discord Floating Button */
+        .discord-float {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #5865F2;
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(88, 101, 242, 0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .discord-float:hover {
+            transform: translateY(-5px) scale(1.05);
+            background-color: #4752C4;
+            box-shadow: 0 12px 28px rgba(88, 101, 242, 0.5);
+        }
 
-  .logo {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em;
-  }
-  .logo svg { color: var(--accent); }
-  .logo span { color: var(--accent); }
-
-  #owner-btn {
-    display: flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; border: none; border-radius: 8px;
-    padding: 9px 18px;
-    font-family: 'DM Mono', monospace; font-size: 0.8rem; font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-  }
-  #owner-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,106,255,0.4); }
-  #owner-btn:active { transform: translateY(0); }
-
-  main {
-    position: relative; z-index: 1;
-    max-width: 900px; margin: 0 auto; padding: 64px 40px 120px;
-  }
-
-  .hero { margin-bottom: 64px; }
-
-  .hero-tag {
-    display: inline-block;
-    font-family: 'DM Mono', monospace; font-size: 0.72rem;
-    color: var(--accent);
-    background: rgba(124,106,255,0.1);
-    border: 1px solid rgba(124,106,255,0.25);
-    border-radius: 4px; padding: 4px 10px; margin-bottom: 20px;
-    letter-spacing: 0.06em; text-transform: uppercase;
-  }
-
-  h1 {
-    font-size: clamp(2.2rem, 5vw, 3.6rem);
-    font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px;
-  }
-  h1 em {
-    font-style: normal;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 500px; line-height: 1.7; font-weight: 400; }
-
-  .section-label {
-    font-family: 'DM Mono', monospace; font-size: 0.7rem;
-    color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;
-  }
-
-  #mods-container { display: flex; flex-wrap: wrap; gap: 16px; min-height: 60px; }
-
-  .empty-state {
-    width: 100%; padding: 32px; text-align: center;
-    color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 0.8rem;
-    border: 1px dashed var(--border); border-radius: 10px;
-    background: rgba(255,255,255,0.01);
-  }
-
-  /* Rendered mods */
-  .mod-button {
-    border: none; border-radius: 8px; padding: 10px 22px;
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem;
-    cursor: pointer; transition: filter 0.2s, transform 0.15s;
-  }
-  .mod-button:hover { filter: brightness(1.15); transform: translateY(-2px); }
-
-  .mod-card {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px 24px; max-width: 300px; cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .mod-card:hover { border-color: var(--accent); }
-  .mod-card h3 { font-size: 1rem; margin-bottom: 6px; }
-  .mod-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; font-weight: 400; }
-
-  .mod-link {
-    font-family: 'DM Mono', monospace; font-size: 0.85rem;
-    color: var(--accent); text-decoration: none;
-    border-bottom: 1px solid rgba(124,106,255,0.35);
-    transition: color 0.2s; align-self: flex-start; cursor: pointer;
-  }
-  .mod-link:hover { color: var(--accent2); }
-
-  .mod-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: 'DM Mono', monospace; font-size: 0.72rem;
-    padding: 5px 12px; border-radius: 20px; font-weight: 500;
-    cursor: pointer; transition: filter 0.2s;
-  }
-  .mod-badge:hover { filter: brightness(1.2); }
-
-  /* ── ADD MOD OVERLAY ── */
-  #overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
-    z-index: 999; align-items: center; justify-content: center;
-  }
-  #overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  #modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; width: min(560px, 94vw); max-height: 92vh; overflow-y: auto;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(124,106,255,0.08);
-    animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(30px) scale(0.97); opacity: 0; }
-    to   { transform: translateY(0) scale(1); opacity: 1; }
-  }
-
-  .modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 22px 28px 18px; border-bottom: 1px solid var(--border);
-  }
-  .modal-header h2 { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
-  .modal-header h2 span {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  #close-modal {
-    width: 32px; height: 32px; display: grid; place-items: center;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text-muted); cursor: pointer;
-    font-size: 1rem; transition: color 0.2s, background 0.2s;
-  }
-  #close-modal:hover { background: var(--border); color: var(--text); }
-
-  .type-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; padding: 24px 28px 0; }
-
-  .type-btn {
-    display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
-    padding: 14px 16px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; cursor: pointer; text-align: left; color: var(--text);
-    transition: border-color 0.2s, background 0.2s, transform 0.15s;
-  }
-  .type-btn:hover { border-color: var(--accent); background: rgba(124,106,255,0.06); transform: translateY(-1px); }
-  .type-btn.selected { border-color: var(--accent); background: rgba(124,106,255,0.1); }
-  .type-btn .icon { font-size: 1.3rem; margin-bottom: 2px; }
-  .type-btn .label { font-size: 0.85rem; font-weight: 700; }
-  .type-btn .desc { font-size: 0.72rem; color: var(--text-muted); font-family: 'DM Mono', monospace; font-weight: 400; }
-
-  #config-panel { padding: 20px 28px 0; }
-
-  .field-group { margin-bottom: 16px; }
-
-  label {
-    display: block; font-family: 'DM Mono', monospace; font-size: 0.72rem;
-    color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 7px;
-  }
-
-  input[type="text"], input[type="color"], textarea, select {
-    width: 100%;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text);
-    font-family: 'DM Mono', monospace; font-size: 0.85rem;
-    padding: 10px 14px; outline: none; transition: border-color 0.2s;
-  }
-  input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 72px; }
-  input[type="color"] { padding: 4px 8px; height: 40px; cursor: pointer; }
-
-  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  #preview-wrap {
-    margin: 0 28px 20px; padding: 20px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 10px; min-height: 64px;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
-
-  .preview-label {
-    font-family: 'DM Mono', monospace; font-size: 0.68rem;
-    color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase;
-    margin: 0 28px 6px;
-  }
-
-  /* attach divider */
-  .attach-divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 16px 28px 12px;
-    color: var(--text-muted); font-family: 'DM Mono', monospace;
-    font-size: 0.68rem; letter-spacing: 0.08em;
-  }
-  .attach-divider::before, .attach-divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-
-  .json-attach-zone {
-    margin: 0 28px 20px;
-    border: 1px dashed var(--border); border-radius: 10px;
-    padding: 14px 18px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    cursor: pointer; transition: border-color 0.2s, background 0.2s;
-    background: rgba(255,255,255,0.01);
-  }
-  .json-attach-zone:hover { border-color: var(--accent); background: rgba(124,106,255,0.04); }
-  .json-attach-zone.has-file { border-color: var(--green); background: rgba(74,222,128,0.04); }
-
-  .attach-left {
-    display: flex; align-items: center; gap: 10px;
-    font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--text-muted);
-  }
-  .json-attach-zone.has-file .attach-left { color: var(--green); }
-
-  .attach-clear {
-    background: none; border: none; color: var(--text-muted);
-    cursor: pointer; font-size: 0.85rem; padding: 4px 8px;
-    border-radius: 4px; transition: color 0.2s; display: none;
-  }
-  .attach-clear:hover { color: var(--red); }
-  .json-attach-zone.has-file .attach-clear { display: block; }
-
-  #add-mod-btn {
-    display: block; width: calc(100% - 56px);
-    margin: 0 28px 28px; padding: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; border: none; border-radius: 10px;
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem;
-    cursor: pointer; transition: opacity 0.2s, transform 0.15s;
-  }
-  #add-mod-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-  /* ── MOD PAGE ── */
-  #mod-page {
-    display: none; position: fixed; inset: 0;
-    background: var(--bg); z-index: 1100;
-    flex-direction: column; overflow-y: auto;
-  }
-  #mod-page.open { display: flex; animation: fadeIn 0.18s ease; }
-
-  .mod-page-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 40px; border-bottom: 1px solid var(--border);
-    background: rgba(13,13,15,0.92); backdrop-filter: blur(12px);
-    position: sticky; top: 0; z-index: 10; flex-shrink: 0;
-  }
-
-  .back-btn {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text-muted);
-    font-family: 'DM Mono', monospace; font-size: 0.78rem;
-    padding: 8px 14px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
-  }
-  .back-btn:hover { color: var(--text); border-color: var(--accent); }
-
-  #download-json-btn {
-    display: flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; border: none; border-radius: 8px;
-    padding: 9px 18px;
-    font-family: 'DM Mono', monospace; font-size: 0.8rem; font-weight: 500;
-    cursor: pointer; transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-  }
-  #download-json-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,106,255,0.4); }
-
-  .mod-page-body {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 80px 40px; gap: 32px;
-  }
-
-  .mod-page-type-tag {
-    font-family: 'DM Mono', monospace; font-size: 0.7rem;
-    color: var(--accent); background: rgba(124,106,255,0.1);
-    border: 1px solid rgba(124,106,255,0.25);
-    border-radius: 4px; padding: 4px 12px;
-    letter-spacing: 0.08em; text-transform: uppercase;
-  }
-
-  #mod-page-render {
-    display: flex; align-items: center; justify-content: center;
-    transform: scale(1.6); transform-origin: center;
-    margin: 28px 0 48px; pointer-events: none;
-  }
-
-  .mod-page-meta {
-    font-family: 'DM Mono', monospace; font-size: 0.75rem;
-    color: var(--text-muted); background: var(--surface);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: 18px 22px; max-width: 480px; width: 100%; line-height: 2.1;
-  }
-  .meta-row { display: flex; gap: 12px; }
-  .meta-key { color: var(--accent); min-width: 80px; }
-  .meta-val { color: var(--text); word-break: break-all; }
-
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-</style>
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #080a0c; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+    </style>
 </head>
-<body>
+<body class="p-6 md:p-12 min-h-screen">
 
-<header>
-  <div class="logo">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-    </svg>
-    <span>your</span>handle<span>/</span>project
-  </div>
-  <button id="owner-btn" onclick="openModal()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
-    Add a mod
-  </button>
-</header>
+    <div id="app" class="max-w-5xl mx-auto" v-cloak>
+        
+        <a href="https://discord.gg/sb4EhhtMvk" target="_blank" class="discord-float" title="Join the Discord">
+            <svg class="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.666 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.29a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .077.01c.12.098.246.196.373.29a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.874.89.076.076 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+            </svg>
+        </a>
+        
+        <header class="mb-12">
+            <div class="flex items-center gap-4">
+                <h1 class="text-5xl font-black text-white tracking-tighter italic">Seralyth <span class="text-blue-500">Macros</span></h1>
+                <span class="bg-blue-500/10 text-blue-500 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-black tracking-widest mt-2 uppercase">v{{ currentVersion }}</span>
+            </div>
+            
+            <div class="mt-10 flex flex-col md:flex-row gap-4">
+                <div class="relative flex-grow">
+                    <input v-model="searchQuery" type="text" :placeholder="searchType === 'title' ? 'Search by name...' : 'Search by profile...'" 
+                        class="w-full bg-[#121519] text-white text-lg border border-[#2d3136] rounded-xl py-5 px-14 focus:outline-none focus:border-blue-500 transition-all placeholder:text-gray-600">
+                    <div class="absolute left-5 top-1/2 -translate-y-1/2 text-blue-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                </div>
+                
+                <select v-model="searchType" class="bg-[#121519] text-white border border-[#2d3136] rounded-xl px-6 py-4 md:py-0 focus:outline-none focus:border-blue-500 cursor-pointer font-bold text-base">
+                    <option value="title">Name</option>
+                    <option value="author">Profile</option>
+                </select>
+            </div>
+        </header>
 
-<main>
-  <div class="hero">
-    <div class="hero-tag">✦ Open source</div>
-    <h1>Build something <em>remarkable</em>.</h1>
-    <p>A minimal GitHub Pages site. Drop mods onto this page using the owner panel — add buttons, cards, links, and badges without touching code.</p>
-  </div>
-  <p class="section-label">// page mods</p>
-  <div id="mods-container">
-    <div class="empty-state" id="empty-state">No mods yet — click <strong>"Add a mod"</strong> to drop one in.</div>
-  </div>
-</main>
+        <div class="mb-8">
+            <div @click="isFormOpen = true" class="request-card p-6 flex justify-between items-center cursor-pointer group shadow-lg border-blue-500/20">
+                <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 rounded-xl bg-blue-500/10 flex items-center justify-center border-2 border-blue-500/30 group-hover:bg-blue-500/20 transition-all">
+                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 4v16m8-8H4"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-white text-2xl font-black tracking-tight group-hover:text-blue-400 transition-colors">Request a Macro</h2>
+                        <p class="text-gray-500 text-sm font-bold uppercase tracking-widest mt-1">Custom submissions</p>
+                    </div>
+                </div>
+                <div class="text-blue-500 text-xs font-black uppercase tracking-[0.2em] hidden sm:block border border-blue-500/30 px-6 py-3 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-all">
+                    Open Form
+                </div>
+            </div>
+        </div>
 
-<!-- ADD MOD MODAL -->
-<div id="overlay" onclick="overlayClick(event)">
-  <div id="modal">
-    <div class="modal-header">
-      <h2>Add a <span>mod</span></h2>
-      <button id="close-modal" onclick="closeModal()">✕</button>
+        <div v-if="isLoading" class="text-blue-400 font-bold animate-pulse tracking-widest uppercase">Fetching database...</div>
+
+        <div v-else class="grid grid-cols-1 gap-4">
+            <div v-if="filteredPosts.length === 0" class="py-16 text-gray-400 text-center border-2 border-dashed border-[#2d3136] rounded-2xl text-xl">
+                No results found for "{{ searchQuery }}"
+            </div>
+
+            <div v-for="post in filteredPosts" :key="post.fileUrl" @click="openModal(post)" class="macro-card p-6 flex justify-between items-center cursor-pointer group shadow-lg">
+                <div class="flex items-center gap-6 overflow-hidden">
+                    <img v-if="post.thumbnail && post.thumbnail !== ''" :src="post.thumbnail" class="w-20 h-20 rounded-xl object-cover flex-shrink-0 border-2 border-gray-800 group-hover:border-blue-500 transition-colors">
+                    
+                    <div class="overflow-hidden">
+                        <h2 class="text-white text-2xl font-black truncate group-hover:text-blue-400 transition-colors tracking-tight">{{ post.title }}</h2>
+                        <div class="text-lg mt-1 flex items-center flex-wrap gap-2">
+                            <span class="text-blue-500 font-extrabold uppercase text-xs tracking-widest bg-blue-500/10 px-2 py-0.5 rounded">@{{ post.author }}</span>
+                            <span class="text-white font-medium opacity-90 truncate max-w-md">{{ post.message }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-blue-500 text-xs font-black uppercase tracking-[0.2em] hidden sm:block border border-blue-500/30 px-4 py-2 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-all">
+                    View
+                </div>
+            </div>
+        </div>
+
+        <div v-if="isLogOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 modal-blur" @click="closeLog">
+            <div class="modal-content w-full max-w-lg flex flex-col shadow-2xl border-blue-500/50 p-8 text-center" @click.stop>
+                <div class="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/40">
+                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-white font-black text-3xl tracking-tight mb-2">What's New</h3>
+                <p class="text-blue-500 font-bold text-xs tracking-widest uppercase mb-8">Version {{ currentVersion }}</p>
+                <p class="text-gray-200 text-lg font-medium leading-relaxed mb-10">{{ updateLogMessage }}</p>
+                <button @click="closeLog" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all shadow-lg shadow-blue-600/20">
+                    Acknowledge
+                </button>
+            </div>
+        </div>
+
+        <div v-if="isFormOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 modal-blur" @click="isFormOpen = false">
+            <div class="modal-content w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden shadow-2xl" @click.stop>
+                <div class="p-8 border-b border-gray-800 flex justify-between items-center">
+                    <h3 class="text-white font-black text-3xl tracking-tight">Macro Request</h3>
+                    <button @click="isFormOpen = false" class="text-gray-500 hover:text-white transition-colors p-2 bg-white/5 rounded-full">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="p-4 bg-black/20">
+                    <div class="form-container">
+                        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd4IHIPxxoqYoZKClXiY8WBY7Fg2cjOhFPoAD5gFu_j2-PPuQ/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 modal-blur" @click="closeModal">
+            <div class="modal-content w-full max-w-5xl flex flex-col max-h-[90vh] overflow-hidden shadow-2xl" @click.stop>
+                <div class="p-8 border-b border-gray-800 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-white font-black text-3xl tracking-tight">{{ activePost.title }}</h3>
+                        <div class="text-base mt-1">
+                            <span class="text-gray-500 font-bold uppercase text-xs tracking-widest">Creator:</span>
+                            <span class="text-blue-400 font-black ml-2">@{{ activePost.author }}</span>
+                        </div>
+                    </div>
+                    <button @click="closeModal" class="text-gray-500 hover:text-white transition-colors p-2 bg-white/5 rounded-full">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <div class="p-8 overflow-auto">
+                    <div class="flex flex-col md:flex-row gap-8 mb-10 items-stretch">
+                        <div v-if="activePost.message" class="flex-1 bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center">
+                            <p class="text-white text-xl font-bold leading-relaxed">{{ activePost.message }}</p>
+                        </div>
+                        <div v-if="activePost.videoUrl && activePost.videoUrl !== ''" class="flex-1 w-full">
+                            <div class="video-container">
+                                <iframe :src="getEmbedUrl(activePost.videoUrl)" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[11px] font-black text-blue-500 uppercase tracking-[0.3em] mb-3 ml-1">JSON Content</p>
+                    <pre><code class="language-json">{{ activeJsonContent }}</code></pre>
+                </div>
+
+                <div class="p-8 bg-[#161a1f] border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div class="text-gray-400 text-sm font-mono flex items-center gap-3">
+                        <span class="bg-white/5 px-3 py-1 rounded border border-white/5">{{ activeFileName }}</span>
+                        <span class="opacity-50 text-xs">({{ activeFileSize }})</span>
+                    </div>
+                    <a :href="activePost.fileUrl" download class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-14 py-5 rounded-2xl font-black text-center transition-all active:scale-95 shadow-lg shadow-blue-600/20 uppercase tracking-widest text-sm">
+                        Download
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="type-grid">
-      <button class="type-btn selected" data-type="button" onclick="selectType(this,'button')">
-        <span class="icon">🔲</span><span class="label">Button</span><span class="desc">Clickable CTA or action</span>
-      </button>
-      <button class="type-btn" data-type="card" onclick="selectType(this,'card')">
-        <span class="icon">🃏</span><span class="label">Card</span><span class="desc">Title + description block</span>
-      </button>
-      <button class="type-btn" data-type="link" onclick="selectType(this,'link')">
-        <span class="icon">🔗</span><span class="label">Link</span><span class="desc">Styled anchor element</span>
-      </button>
-      <button class="type-btn" data-type="badge" onclick="selectType(this,'badge')">
-        <span class="icon">🏷️</span><span class="label">Badge</span><span class="desc">Status or label pill</span>
-      </button>
-    </div>
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+        
+        const currentVersion = "1.2"; 
+        const updateLogMessage = "Added Gazebo Branch Macro by Odsu";
 
-    <div id="config-panel"></div>
+        createApp({
+            setup() {
+                const posts = ref([]);
+                const isLoading = ref(true);
+                const searchQuery = ref('');
+                const searchType = ref('title');
+                const isModalOpen = ref(false);
+                const isFormOpen = ref(false);
+                const isLogOpen = ref(false);
+                const activePost = ref({});
+                const activeJsonContent = ref('');
+                const activeFileName = ref('');
+                const activeFileSize = ref('0 KB');
 
-    <p class="preview-label">// live preview</p>
-    <div id="preview-wrap"></div>
+                onMounted(async () => {
+                    const savedVer = localStorage.getItem('seralyth_ver');
+                    if (savedVer !== currentVersion) isLogOpen.value = true;
 
-    <div class="attach-divider">or import from JSON</div>
-    <div class="json-attach-zone" id="json-attach-zone" onclick="document.getElementById('json-file-input').click()">
-      <div class="attach-left">
-        <span>📎</span>
-        <span id="json-attach-status">Attach a mod JSON file…</span>
-      </div>
-      <button class="attach-clear" id="attach-clear-btn" title="Clear" onclick="clearJsonAttach(event)">✕</button>
-      <input type="file" id="json-file-input" accept=".json,application/json" style="display:none" onchange="handleJsonAttach(event)" />
-    </div>
+                    try {
+                        const res = await fetch('https://jiftya.github.io/saralyth-macros/posts.json?v=' + Date.now());
+                        posts.value = await res.json();
+                    } catch (e) { console.error(e); }
+                    finally { isLoading.value = false; }
+                });
 
-    <button id="add-mod-btn" onclick="addMod()">Add mod to page</button>
-  </div>
-</div>
+                const closeLog = () => {
+                    localStorage.setItem('seralyth_ver', currentVersion);
+                    isLogOpen.value = false;
+                };
 
-<!-- MOD PAGE -->
-<div id="mod-page">
-  <div class="mod-page-header">
-    <button class="back-btn" onclick="closeModPage()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-      Back
-    </button>
-    <button id="download-json-btn" onclick="downloadModJSON()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Download JSON
-    </button>
-  </div>
-  <div class="mod-page-body">
-    <div class="mod-page-type-tag" id="mod-page-tag">button</div>
-    <div id="mod-page-render"></div>
-    <div class="mod-page-meta" id="mod-page-meta"></div>
-  </div>
-</div>
+                const getEmbedUrl = (url) => {
+                    if (!url) return '';
+                    let id = '';
+                    if (url.includes('v=')) id = url.split('v=')[1].split('&')[0];
+                    else if (url.includes('be/')) id = url.split('be/')[1].split('?')[0];
+                    else if (url.includes('embed/')) return url;
+                    return `https://www.youtube.com/embed/${id}`;
+                };
 
-<script>
-  let currentType = 'button';
-  let pendingJsonData = null;
-  let activeModData = null;
-  const STORAGE_KEY = 'github-page-mods';
+                const filteredPosts = computed(() => {
+                    const q = searchQuery.value.toLowerCase().trim();
+                    if (!q) return posts.value;
+                    return posts.value.filter(p => searchType.value === 'title' ? p.title?.toLowerCase().includes(q) : p.author?.toLowerCase().includes(q));
+                });
 
-  // ── STORAGE ──
-  function loadMods() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch { return []; }
-  }
-  function saveMods() {
-    const mods = [];
-    document.querySelectorAll('#mods-container [data-mod]').forEach(w => mods.push(JSON.parse(w.dataset.mod)));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mods));
-  }
+                const openModal = async (post) => {
+                    activePost.value = post;
+                    activeFileName.value = post.fileUrl ? post.fileUrl.split('/').pop() : 'macro.json';
+                    isModalOpen.value = true;
+                    activeJsonContent.value = "READING...";
+                    document.body.style.overflow = 'hidden';
+                    try {
+                        const res = await fetch(post.fileUrl);
+                        const size = res.headers.get("content-length");
+                        activeFileSize.value = size ? (size / 1024).toFixed(1) + " KB" : "Unknown";
+                        const data = await res.json();
+                        activeJsonContent.value = JSON.stringify(data, null, 4);
+                        nextTick(() => { Prism.highlightAll(); });
+                    } catch (e) { activeJsonContent.value = "// Error loading file."; }
+                };
 
-  // ── ADD MOD MODAL ──
-  function openModal() {
-    pendingJsonData = null;
-    document.getElementById('overlay').classList.add('open');
-    selectType(document.querySelector('.type-btn[data-type="button"]'), 'button');
-    resetJsonAttachUI();
-  }
-  function closeModal() { document.getElementById('overlay').classList.remove('open'); }
-  function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+                const closeModal = () => { isModalOpen.value = false; document.body.style.overflow = ''; };
 
-  function selectType(el, type) {
-    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-    currentType = type;
-    pendingJsonData = null;
-    resetJsonAttachUI();
-    renderConfigPanel(type);
-  }
-
-  // ── CONFIG PANELS ──
-  const configs = {
-    button: `
-      <div class="field-group"><label>Button label</label><input type="text" id="f-label" placeholder="Click me" oninput="updatePreview()" value="Click me" /></div>
-      <div class="row-2">
-        <div class="field-group"><label>Background color</label><input type="color" id="f-bg" value="#7c6aff" oninput="updatePreview()" /></div>
-        <div class="field-group"><label>Text color</label><input type="color" id="f-color" value="#ffffff" oninput="updatePreview()" /></div>
-      </div>
-      <div class="field-group"><label>On click — open URL (optional)</label><input type="text" id="f-url" placeholder="https://github.com/…" oninput="updatePreview()" /></div>`,
-    card: `
-      <div class="field-group"><label>Card title</label><input type="text" id="f-title" placeholder="My feature" oninput="updatePreview()" value="My feature" /></div>
-      <div class="field-group"><label>Description</label><textarea id="f-desc" oninput="updatePreview()">A short description of this feature.</textarea></div>`,
-    link: `
-      <div class="field-group"><label>Link text</label><input type="text" id="f-label" placeholder="View docs →" oninput="updatePreview()" value="View docs →" /></div>
-      <div class="field-group"><label>URL</label><input type="text" id="f-url" placeholder="https://…" oninput="updatePreview()" value="https://github.com" /></div>`,
-    badge: `
-      <div class="field-group"><label>Badge text</label><input type="text" id="f-label" placeholder="v1.0.0" oninput="updatePreview()" value="v1.0.0" /></div>
-      <div class="row-2">
-        <div class="field-group"><label>Background</label><input type="color" id="f-bg" value="#4ade80" oninput="updatePreview()" /></div>
-        <div class="field-group"><label>Text color</label><input type="color" id="f-color" value="#0d0d0f" oninput="updatePreview()" /></div>
-      </div>
-      <div class="field-group"><label>Dot / emoji prefix (optional)</label><input type="text" id="f-prefix" placeholder="●" oninput="updatePreview()" value="●" /></div>`
-  };
-
-  function renderConfigPanel(type) {
-    document.getElementById('config-panel').innerHTML = configs[type];
-    updatePreview();
-  }
-
-  function val(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-
-  function updatePreview() {
-    document.getElementById('preview-wrap').innerHTML = buildElementHTML(currentType, collectFormData(currentType));
-  }
-
-  function collectFormData(type) {
-    if (type === 'button') return { type, label: val('f-label'), bg: val('f-bg'), color: val('f-color'), url: val('f-url') };
-    if (type === 'card')   return { type, title: val('f-title'), desc: val('f-desc') };
-    if (type === 'link')   return { type, label: val('f-label'), url: val('f-url') };
-    if (type === 'badge')  return { type, label: val('f-label'), bg: val('f-bg'), color: val('f-color'), prefix: val('f-prefix') };
-  }
-
-  function buildElementHTML(type, d) {
-    if (type === 'button') {
-      const bg = d.bg||'#7c6aff', color = d.color||'#fff', label = d.label||'Button';
-      return `<button class="mod-button" style="background:${bg};color:${color}">${label}</button>`;
-    }
-    if (type === 'card') {
-      return `<div class="mod-card"><h3>${d.title||'Card title'}</h3><p>${d.desc||'Description.'}</p></div>`;
-    }
-    if (type === 'link') {
-      return `<a class="mod-link" href="${d.url||'#'}" target="_blank">${d.label||'Link'}</a>`;
-    }
-    if (type === 'badge') {
-      const bg = d.bg||'#4ade80', color = d.color||'#0d0d0f', label = d.label||'Badge';
-      return `<span class="mod-badge" style="background:${bg}20;color:${color};border:1px solid ${bg}55">${d.prefix?`<span>${d.prefix}</span>`:''} ${label}</span>`;
-    }
-    return '';
-  }
-
-  // ── JSON ATTACH ──
-  function handleJsonAttach(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (!data.type || !configs[data.type]) { alert('Invalid mod JSON — missing or unknown "type".'); return; }
-        pendingJsonData = data;
-        const zone = document.getElementById('json-attach-zone');
-        zone.classList.add('has-file');
-        document.getElementById('json-attach-status').textContent = `${file.name} — ${data.type} mod loaded`;
-        // Switch type picker to match
-        const btn = document.querySelector(`.type-btn[data-type="${data.type}"]`);
-        if (btn) { document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); currentType = data.type; }
-        renderConfigPanel(data.type);
-        // Fill fields from JSON
-        setTimeout(() => fillFields(data), 50);
-        updatePreview();
-      } catch { alert('Could not parse JSON file.'); }
-    };
-    reader.readAsText(file);
-    event.target.value = '';
-  }
-
-  function fillFields(d) {
-    if (d.label) { const el = document.getElementById('f-label'); if (el) el.value = d.label; }
-    if (d.bg)    { const el = document.getElementById('f-bg');    if (el) el.value = d.bg; }
-    if (d.color) { const el = document.getElementById('f-color'); if (el) el.value = d.color; }
-    if (d.url)   { const el = document.getElementById('f-url');   if (el) el.value = d.url; }
-    if (d.title) { const el = document.getElementById('f-title'); if (el) el.value = d.title; }
-    if (d.desc)  { const el = document.getElementById('f-desc');  if (el) el.value = d.desc; }
-    if (d.prefix){ const el = document.getElementById('f-prefix');if (el) el.value = d.prefix; }
-    updatePreview();
-  }
-
-  function clearJsonAttach(e) {
-    e.stopPropagation();
-    pendingJsonData = null;
-    resetJsonAttachUI();
-  }
-
-  function resetJsonAttachUI() {
-    const zone = document.getElementById('json-attach-zone');
-    if (zone) zone.classList.remove('has-file');
-    const status = document.getElementById('json-attach-status');
-    if (status) status.textContent = 'Attach a mod JSON file…';
-  }
-
-  // ── MOUNT MOD ──
-  function mountMod(data, skipSave) {
-    const container = document.getElementById('mods-container');
-    const empty = document.getElementById('empty-state');
-    if (empty) empty.remove();
-
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:relative;display:inline-flex;align-items:flex-start;';
-    wrapper.dataset.mod = JSON.stringify(data);
-
-    // Build inner HTML — clickable to open mod page
-    const inner = document.createElement('div');
-    inner.innerHTML = buildElementHTML(data.type, data);
-    const el = inner.firstElementChild;
-    el.addEventListener('click', (e) => { e.preventDefault(); openModPage(data); });
-    wrapper.appendChild(el);
-
-    const remove = document.createElement('button');
-    remove.textContent = '×';
-    remove.title = 'Remove mod';
-    remove.style.cssText = `position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:#f87171;color:#fff;border:none;font-size:0.75rem;cursor:pointer;display:none;line-height:1;font-family:'Syne',sans-serif;font-weight:700;z-index:10;`;
-    remove.onclick = (e) => {
-      e.stopPropagation();
-      wrapper.remove();
-      if (!document.querySelectorAll('#mods-container [data-mod]').length) {
-        const es = document.createElement('div');
-        es.id = 'empty-state'; es.className = 'empty-state';
-        es.innerHTML = 'No mods yet — click <strong>"Add a mod"</strong> to drop one in.';
-        container.appendChild(es);
-      }
-      saveMods();
-    };
-
-    wrapper.addEventListener('mouseenter', () => remove.style.display = 'grid');
-    wrapper.addEventListener('mouseleave', () => remove.style.display = 'none');
-    wrapper.appendChild(remove);
-    container.appendChild(wrapper);
-    if (!skipSave) saveMods();
-  }
-
-  function addMod() {
-    const data = pendingJsonData || collectFormData(currentType);
-    mountMod(data);
-    closeModal();
-  }
-
-  // ── MOD PAGE ──
-  function openModPage(data) {
-    activeModData = data;
-    document.getElementById('mod-page-tag').textContent = data.type + ' mod';
-    document.getElementById('mod-page-render').innerHTML = buildElementHTML(data.type, data);
-
-    // Build meta table
-    const meta = document.getElementById('mod-page-meta');
-    const rows = Object.entries(data).map(([k, v]) => {
-      if (!v && v !== 0) return '';
-      const display = k === 'bg' || k === 'color'
-        ? `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${v};border:1px solid rgba(255,255,255,0.15)"></span>${v}</span>`
-        : v;
-      return `<div class="meta-row"><span class="meta-key">${k}</span><span class="meta-val">${display}</span></div>`;
-    }).join('');
-    meta.innerHTML = rows || '<div class="meta-row"><span class="meta-val">No fields</span></div>';
-
-    document.getElementById('mod-page').classList.add('open');
-  }
-
-  function closeModPage() {
-    document.getElementById('mod-page').classList.remove('open');
-    activeModData = null;
-  }
-
-  function downloadModJSON() {
-    if (!activeModData) return;
-    const blob = new Blob([JSON.stringify(activeModData, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `mod-${activeModData.type}-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-
-  // ── INIT ──
-  document.addEventListener('DOMContentLoaded', () => {
-    loadMods().forEach(data => mountMod(data, true));
-    renderConfigPanel('button');
-  });
-</script>
+                return { 
+                    posts, isLoading, searchQuery, searchType, filteredPosts, 
+                    isModalOpen, isFormOpen, isLogOpen, activePost, 
+                    activeJsonContent, activeFileName, activeFileSize, 
+                    openModal, closeModal, getEmbedUrl, closeLog, currentVersion, updateLogMessage
+                };
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
