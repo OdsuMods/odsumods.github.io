@@ -9,7 +9,7 @@
     {
       "username": "guest",
       "password": "guest123",
-      "verified": false,
+      "verified": true,
       "admin": false
     }
   ]
