@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "username": "odsumods",
+      "password": "myPassword123",
+      "verified": true,
+      "admin": true
+    },
+    {
+      "username": "guest",
+      "password": "guest123",
+      "verified": false,
+      "admin": false
+    }
+  ]
+}
