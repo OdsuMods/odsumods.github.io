@@ -1,455 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Simple 3D FPS - WASD + Mouse</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 10px 20px;
-            border-radius: 8px;
-            pointer-events: none;
-            z-index: 10;
-            text-shadow: 1px 1px 3px black;
-            user-select: none;
-            backdrop-filter: blur(4px);
-            border-left: 4px solid #ffaa00;
-        }
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 6px;
-            height: 6px;
-            background: rgba(255,255,255,0.9);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 10;
-            box-shadow: 0 0 8px rgba(0,0,0,0.5);
-            border: 1px solid rgba(0,0,0,0.3);
-        }
-        #instructions {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: #ccc;
-            background: rgba(20,20,20,0.7);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            pointer-events: none;
-            z-index: 10;
-            backdrop-filter: blur(4px);
-        }
-        #status {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: #aaa;
-            background: rgba(0,0,0,0.4);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            pointer-events: none;
-            z-index: 10;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Applications</title>
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'JetBrains Mono', monospace;
+}
+
+body{
+    background:#090909;
+    color:white;
+}
+
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+    border-bottom:1px solid #333;
+}
+
+header h1{
+    color:#b76cff;
+    font-size:28px;
+}
+
+.container{
+    max-width:1300px;
+    margin:auto;
+    padding:40px;
+}
+
+.topbar{
+    display:flex;
+    gap:15px;
+    margin-bottom:30px;
+}
+
+input{
+    flex:1;
+    background:#111;
+    border:1px solid #444;
+    color:white;
+    padding:12px;
+    outline:none;
+}
+
+button{
+    background:transparent;
+    color:#b76cff;
+    border:1px solid #b76cff;
+    padding:12px 20px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    background:#b76cff;
+    color:black;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:#111;
+    border:1px solid #333;
+    padding:20px;
+    transition:.2s;
+}
+
+.card:hover{
+    border-color:#b76cff;
+    transform:translateY(-5px);
+}
+
+.card img{
+    width:100%;
+    height:170px;
+    object-fit:cover;
+    margin-bottom:15px;
+}
+
+.card h2{
+    color:#b76cff;
+    margin-bottom:10px;
+}
+
+.card p{
+    color:#bbb;
+    margin-bottom:15px;
+}
+
+.download{
+    display:inline-block;
+    text-decoration:none;
+    color:#b76cff;
+    border:1px solid #b76cff;
+    padding:10px 15px;
+    transition:.2s;
+}
+
+.download:hover{
+    background:#b76cff;
+    color:black;
+}
+</style>
 </head>
 <body>
-    <div id="info">🎮 3D World | <span style="color:#ffaa00;">WASD</span> to move | <span style="color:#ffaa00;">Mouse</span> to look</div>
-    <div id="crosshair"></div>
-    <div id="instructions">Click to lock mouse | Press ESC to unlock</div>
-    <div id="status">✨ Move around and explore</div>
 
-    <!-- Import Three.js core and addons from CDN -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-            }
-        }
-    </script>
+<header>
+<h1>My Applications</h1>
+</header>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+<div class="container">
 
-        // --- Initialization ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Sky blue
-        scene.fog = new THREE.FogExp2(0x87CEEB, 0.012); // Gentle fog for depth
+<div class="topbar">
+<input type="text" id="search" placeholder="Search applications...">
+<button onclick="filterApps()">Search</button>
+</div>
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 2, 8); // Starting position
+<div id="apps" class="grid"></div>
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // Enable shadows for better effect
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.appendChild(renderer.domElement);
+</div>
 
-        // CSS2 Renderer for labels (simple)
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0px';
-        labelRenderer.domElement.style.left = '0px';
-        labelRenderer.domElement.style.pointerEvents = 'none';  // allow clicking through to canvas
-        document.body.appendChild(labelRenderer.domElement);
+<script>
+let apps=[];
 
-        // --- Pointer Lock Controls (Mouse Look + WASD movement) ---
-        const controls = new PointerLockControls(camera, document.body);
-        
-        // Connect controls to camera for movement
-        scene.add(controls.getObject());
+fetch("apps.json")
+.then(r=>r.json())
+.then(data=>{
+    apps=data;
+    display(apps);
+});
 
-        // Movement state
-        const moveState = {
-            forward: false,
-            backward: false,
-            left: false,
-            right: false
-        };
-        
-        const moveSpeed = 8.0;
-        const velocity = new THREE.Vector3();
-        const direction = new THREE.Vector3();
+function display(list){
 
-        // --- Event Listeners for Pointer Lock and Keyboard ---
-        const instructionsEl = document.getElementById('instructions');
-        
-        // Request pointer lock on click
-        document.body.addEventListener('click', () => {
-            controls.lock();
-        });
+    const container=document.getElementById("apps");
+    container.innerHTML="";
 
-        controls.addEventListener('lock', () => {
-            instructionsEl.style.opacity = '0.3';
-            instructionsEl.innerHTML = '🔒 Mouse locked | ESC to unlock';
-            setTimeout(() => instructionsEl.style.opacity = '1', 200);
-        });
+    list.forEach(app=>{
 
-        controls.addEventListener('unlock', () => {
-            instructionsEl.style.opacity = '1';
-            instructionsEl.innerHTML = 'Click to lock mouse | Press ESC to unlock';
-        });
+        container.innerHTML+=`
+        <div class="card">
+            <img src="${app.image}" alt="">
+            <h2>${app.name}</h2>
+            <p>${app.description}</p>
+            <p><strong>Version:</strong> ${app.version}</p>
+            <a class="download" href="${app.download}" download>Download</a>
+        </div>
+        `;
 
-        // Keyboard handling
-        const onKeyDown = (e) => {
-            switch(e.code) {
-                case 'KeyW': moveState.forward = true; e.preventDefault(); break;
-                case 'KeyS': moveState.backward = true; e.preventDefault(); break;
-                case 'KeyA': moveState.left = true; e.preventDefault(); break;
-                case 'KeyD': moveState.right = true; e.preventDefault(); break;
-                // Prevent space from scrolling, but we don't use jump in this simple demo
-                case 'Space': e.preventDefault(); break;
-            }
-        };
+    });
 
-        const onKeyUp = (e) => {
-            switch(e.code) {
-                case 'KeyW': moveState.forward = false; e.preventDefault(); break;
-                case 'KeyS': moveState.backward = false; e.preventDefault(); break;
-                case 'KeyA': moveState.left = false; e.preventDefault(); break;
-                case 'KeyD': moveState.right = false; e.preventDefault(); break;
-                case 'Space': e.preventDefault(); break;
-            }
-        };
+}
 
-        document.addEventListener('keydown', onKeyDown);
-        document.addEventListener('keyup', onKeyUp);
+function filterApps(){
 
-        // Prevent context menu on right click
-        window.addEventListener('contextmenu', e => e.preventDefault());
+    const value=document.getElementById("search").value.toLowerCase();
 
-        // --- Lighting ---
-        
-        // Ambient base light
-        scene.add(new THREE.AmbientLight(0x404060, 0.5));
-        
-        // Main directional light (simulating sun)
-        const sunLight = new THREE.DirectionalLight(0xfff5d1, 1.0);
-        sunLight.position.set(20, 30, 10);
-        sunLight.castShadow = true;
-        sunLight.receiveShadow = true;
-        sunLight.shadow.mapSize.width = 1024;
-        sunLight.shadow.mapSize.height = 1024;
-        const d = 30;
-        sunLight.shadow.camera.left = -d;
-        sunLight.shadow.camera.right = d;
-        sunLight.shadow.camera.top = d;
-        sunLight.shadow.camera.bottom = -d;
-        sunLight.shadow.camera.near = 1;
-        sunLight.shadow.camera.far = 50;
-        sunLight.shadow.bias = -0.0005;
-        scene.add(sunLight);
-        
-        // Fill light from opposite side
-        const fillLight = new THREE.PointLight(0x4466ff, 0.4);
-        fillLight.position.set(-10, 5, 10);
-        scene.add(fillLight);
-        
-        // Ground fill
-        const groundLight = new THREE.PointLight(0x88aaff, 0.3);
-        groundLight.position.set(5, 3, -5);
-        scene.add(groundLight);
+    display(
+        apps.filter(app=>
+            app.name.toLowerCase().includes(value) ||
+            app.description.toLowerCase().includes(value)
+        )
+    );
 
-        // --- World Creation ---
+}
+</script>
 
-        // Ground plane
-        const groundGeometry = new THREE.CircleGeometry(40, 32);
-        const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x3a6b4a, 
-            roughness: 0.8, 
-            metalness: 0.1,
-            side: THREE.DoubleSide
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.y = -0.01;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Add a grid helper for style
-        const gridHelper = new THREE.GridHelper(80, 20, 0x88aa88, 0x445544);
-        gridHelper.position.y = 0;
-        scene.add(gridHelper);
-
-        // Decorative: some grass patches (small circles)
-        const grassMat = new THREE.MeshStandardMaterial({ color: 0x5a9e6e, roughness: 0.9 });
-        for (let i = 0; i < 30; i++) {
-            const patch = new THREE.Mesh(new THREE.CylinderGeometry(0.5 + Math.random()*0.8, 0.6, 0.1, 6), grassMat);
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 5 + Math.random() * 20;
-            patch.position.x = Math.cos(angle) * radius;
-            patch.position.z = Math.sin(angle) * radius;
-            patch.position.y = 0.05;
-            patch.receiveShadow = true;
-            patch.castShadow = true;
-            patch.rotation.y = Math.random() * Math.PI;
-            scene.add(patch);
-        }
-
-        // --- Create obstacles / structures ---
-        
-        function createBox(color, x, y, z, sx, sy, sz, castShadow = true, receiveShadow = true) {
-            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.1 });
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
-            mesh.position.set(x, y, z);
-            mesh.castShadow = castShadow;
-            mesh.receiveShadow = receiveShadow;
-            scene.add(mesh);
-            return mesh;
-        }
-
-        function createCylinder(color, x, y, z, radiusTop, radiusBottom, height, castShadow = true, receiveShadow = true) {
-            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
-            const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 12), mat);
-            mesh.position.set(x, y, z);
-            mesh.castShadow = castShadow;
-            mesh.receiveShadow = receiveShadow;
-            scene.add(mesh);
-            return mesh;
-        }
-
-        // Central tower
-        createBox(0xaa8866, 0, 2.5, 0, 3, 5, 3);
-        createCylinder(0xccaa88, 0, 5.2, 0, 1.8, 1.8, 0.8);
-        
-        // Pillars around
-        const positions = [
-            [-6, 0, -5], [7, 0, -4], [-5, 0, 7], [6, 0, 6],
-            [-8, 0, 2], [9, 0, -2], [-7, 0, -6], [8, 0, 5]
-        ];
-        positions.forEach((pos, i) => {
-            createCylinder(0x8a7a6a, pos[0], 1.5, pos[2], 0.8, 0.8, 3.0);
-        });
-
-        // Some random cubes as cover
-        createBox(0x6b8e9b, -3, 0.5, -4, 1.5, 1, 1.5);
-        createBox(0x9b7e6b, 4, 0.75, 3, 1.5, 1.5, 1.5);
-        createBox(0x7b9e6b, -5, 0.4, 4, 1.2, 0.8, 1.2);
-        createBox(0x9b6b7e, 6, 0.6, -3, 1.2, 1.2, 1.2);
-        
-        // A ramp? (using rotated box)
-        const rampMat = new THREE.MeshStandardMaterial({ color: 0xbc8f8f, roughness: 0.7 });
-        const ramp = new THREE.Mesh(new THREE.BoxGeometry(3, 0.4, 2), rampMat);
-        ramp.position.set(-2, 0.2, 6);
-        ramp.rotation.z = -0.2;
-        ramp.rotation.y = 0.3;
-        ramp.castShadow = true;
-        ramp.receiveShadow = true;
-        scene.add(ramp);
-
-        // --- Trees (simple) ---
-        function createTree(x, z, scale = 1) {
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b5e3c, roughness: 0.9 });
-            const leafMat = new THREE.MeshStandardMaterial({ color: 0x3c8b5e, roughness: 0.6 });
-            
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4 * scale, 0.5 * scale, 2.5 * scale, 6), trunkMat);
-            trunk.position.set(x, 1.25 * scale, z);
-            trunk.castShadow = true;
-            trunk.receiveShadow = true;
-            scene.add(trunk);
-            
-            const leaves1 = new THREE.Mesh(new THREE.ConeGeometry(1.2 * scale, 1.8 * scale, 8), leafMat);
-            leaves1.position.set(x, 2.8 * scale, z);
-            leaves1.castShadow = true;
-            leaves1.receiveShadow = true;
-            scene.add(leaves1);
-            
-            const leaves2 = new THREE.Mesh(new THREE.ConeGeometry(1.0 * scale, 1.5 * scale, 8), leafMat);
-            leaves2.position.set(x, 3.8 * scale, z);
-            leaves2.castShadow = true;
-            leaves2.receiveShadow = true;
-            scene.add(leaves2);
-        }
-
-        createTree(-8, -8, 1.1);
-        createTree(9, -7, 1.0);
-        createTree(-9, 8, 1.2);
-        createTree(10, 6, 0.9);
-        createTree(-7, 10, 1.0);
-        createTree(5, -9, 1.1);
-        
-        // --- Decorative floating labels (CSS2D) to make it more game-like ---
-        function createLabel(text, position, color = '#ffaa00', fontSize = '16px') {
-            const div = document.createElement('div');
-            div.textContent = text;
-            div.style.color = '#fff';
-            div.style.fontSize = fontSize;
-            div.style.fontWeight = 'bold';
-            div.style.textShadow = '1px 1px 3px black';
-            div.style.padding = '4px 12px';
-            div.style.borderRadius = '12px';
-            div.style.background = color;
-            div.style.pointerEvents = 'none';
-            div.style.border = '1px solid rgba(255,255,255,0.5)';
-            div.style.backdropFilter = 'blur(2px)';
-            
-            const label = new CSS2DObject(div);
-            label.position.copy(position);
-            scene.add(label);
-            return label;
-        }
-
-        createLabel('🏁 Start', new THREE.Vector3(0, 3.5, 2), '#3366cc', '14px');
-        createLabel('🗼 Tower', new THREE.Vector3(0, 7, 0), '#aa6644', '14px');
-        createLabel('🌳 Forest', new THREE.Vector3(-8, 4, -8), '#2d6a4f', '14px');
-        createLabel('🪨 Rocks', new THREE.Vector3(7, 2.5, -4), '#7f8c8d', '14px');
-        
-        // Add some floating particles / stars (atmosphere)
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsCount = 300;
-        const starPositions = new Float32Array(starsCount * 3);
-        for (let i = 0; i < starsCount * 3; i += 3) {
-            // Spread in a large sphere
-            const r = 60 + Math.random() * 40;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos((Math.random() * 2) - 1);
-            starPositions[i] = Math.sin(phi) * Math.cos(theta) * r;
-            starPositions[i+1] = Math.sin(phi) * Math.sin(theta) * r;
-            starPositions[i+2] = Math.cos(phi) * r;
-        }
-        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-        const starsMaterial = new THREE.PointsMaterial({color: 0xffffff, size: 0.15, transparent: true});
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
-
-        // --- Helper to show bounds (invisible walls aren't needed, but just for atmosphere) ---
-        // We'll add a ring of small markers
-        const ringMat = new THREE.MeshStandardMaterial({ color: 0x99aabb, emissive: new THREE.Color(0x224466), emissiveIntensity: 0.3 });
-        for (let i = 0; i < 16; i++) {
-            const angle = (i / 16) * Math.PI * 2;
-            const radius = 22;
-            const marker = new THREE.Mesh(new THREE.SphereGeometry(0.3, 4, 2), ringMat);
-            marker.position.set(Math.cos(angle) * radius, 0.5, Math.sin(angle) * radius);
-            marker.receiveShadow = true;
-            scene.add(marker);
-        }
-
-        // --- Animation Loop ---
-        const clock = new THREE.Clock();
-        
-        function animate() {
-            const delta = Math.min(clock.getDelta(), 0.1);
-            const time = performance.now() * 0.001; // seconds
-            
-            // Rotate stars slowly
-            stars.rotation.y += 0.005 * delta * 30; // adjust for delta
-            
-            // Movement (only if pointer is locked)
-            if (controls.isLocked) {
-                // Calculate direction from camera
-                direction.z = Number(moveState.forward) - Number(moveState.backward);
-                direction.x = Number(moveState.right) - Number(moveState.left);
-                direction.normalize();
-                
-                // Apply movement relative to camera direction
-                const speed = moveSpeed * delta;
-                
-                if (moveState.forward || moveState.backward) {
-                    velocity.z = direction.z * speed;
-                    controls.moveForward(velocity.z);
-                }
-                if (moveState.right || moveState.left) {
-                    velocity.x = direction.x * speed;
-                    controls.moveRight(velocity.x);
-                }
-                
-                // Simple boundary: keep within ~20 units from center to avoid falling off world feeling
-                const pos = camera.position;
-                const limit = 22;
-                if (Math.abs(pos.x) > limit) {
-                    camera.position.x = Math.sign(pos.x) * limit;
-                }
-                if (Math.abs(pos.z) > limit) {
-                    camera.position.z = Math.sign(pos.z) * limit;
-                }
-                // Keep y within reasonable (we don't have jump/gravity, but just in case)
-                if (pos.y < 1.0) camera.position.y = 1.8; // keep eye level
-                if (pos.y > 4.0) camera.position.y = 4.0;
-            }
-            
-            // Subtle idle animation for the tower top? Not necessary
-            
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-            
-            requestAnimationFrame(animate);
-        }
-        
-        animate();
-
-        // --- Handle Window Resize ---
-        window.addEventListener('resize', onWindowResize, false);
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // --- Initial message fade ---
-        setTimeout(() => {
-            const info = document.getElementById('info');
-            if (info) info.style.opacity = '0.85';
-        }, 1000);
-        
-        console.log('Game ready! Click to lock mouse, use WASD to move, mouse to look around.');
-    </script>
 </body>
 </html>
