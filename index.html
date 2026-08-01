@@ -12,7 +12,7 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'JetBrains Mono', monospace;
+    font-family:'JetBrains Mono',monospace;
 }
 
 body{
@@ -30,7 +30,6 @@ header{
 
 header h1{
     color:#b76cff;
-    font-size:28px;
 }
 
 .container{
@@ -39,33 +38,52 @@ header h1{
     padding:40px;
 }
 
-.topbar{
-    display:flex;
-    gap:15px;
-    margin-bottom:30px;
-}
-
 input{
-    flex:1;
+    width:100%;
+    padding:12px;
+    margin:8px 0;
     background:#111;
     border:1px solid #444;
     color:white;
-    padding:12px;
-    outline:none;
 }
 
 button{
     background:transparent;
     color:#b76cff;
     border:1px solid #b76cff;
-    padding:12px 20px;
+    padding:10px 20px;
     cursor:pointer;
-    transition:.2s;
 }
 
 button:hover{
     background:#b76cff;
     color:black;
+}
+
+#login{
+    max-width:400px;
+    margin:100px auto;
+    background:#111;
+    padding:30px;
+    border:1px solid #333;
+}
+
+#site{
+    display:none;
+}
+
+#adminPanel{
+    display:none;
+    margin-bottom:25px;
+    padding:20px;
+    border:1px solid #b76cff;
+    background:#141414;
+}
+
+.topbar{
+    display:flex;
+    gap:15px;
+    margin-bottom:30px;
 }
 
 .grid{
@@ -78,12 +96,6 @@ button:hover{
     background:#111;
     border:1px solid #333;
     padding:20px;
-    transition:.2s;
-}
-
-.card:hover{
-    border-color:#b76cff;
-    transform:translateY(-5px);
 }
 
 .card img{
@@ -98,67 +110,137 @@ button:hover{
     margin-bottom:10px;
 }
 
-.card p{
-    color:#bbb;
-    margin-bottom:15px;
-}
-
 .download{
     display:inline-block;
+    margin-top:10px;
     text-decoration:none;
     color:#b76cff;
     border:1px solid #b76cff;
     padding:10px 15px;
-    transition:.2s;
-}
-
-.download:hover{
-    background:#b76cff;
-    color:black;
 }
 </style>
 </head>
 <body>
 
+<div id="login">
+
+<h2>Login</h2>
+
+<input id="username" placeholder="Username">
+
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p id="status"></p>
+
+</div>
+
+<div id="site">
+
 <header>
+
 <h1>My Applications</h1>
+
+<div id="welcome"></div>
+
 </header>
 
 <div class="container">
 
+<div id="adminPanel">
+
+<h2>Admin Panel</h2>
+
+<p>You are an administrator.</p>
+
+<button onclick="alert('Add your upload page here.')">
+Upload Application
+</button>
+
+</div>
+
 <div class="topbar">
-<input type="text" id="search" placeholder="Search applications...">
-<button onclick="filterApps()">Search</button>
+
+<input
+id="search"
+placeholder="Search..."
+oninput="filterApps()">
+
 </div>
 
 <div id="apps" class="grid"></div>
 
 </div>
 
+</div>
+
 <script>
+
+let users=[];
 let apps=[];
+
+fetch("users.json")
+.then(r=>r.json())
+.then(data=>users=data.users);
 
 fetch("apps.json")
 .then(r=>r.json())
 .then(data=>{
     apps=data;
-    display(apps);
 });
+
+function login(){
+
+    const username=document.getElementById("username").value;
+    const password=document.getElementById("password").value;
+
+    const user=users.find(u=>
+        u.username===username &&
+        u.password===password
+    );
+
+    if(!user){
+        document.getElementById("status").innerText="Invalid login.";
+        return;
+    }
+
+    if(!user.verified){
+        document.getElementById("status").innerText="Account awaiting verification.";
+        return;
+    }
+
+    document.getElementById("login").style.display="none";
+    document.getElementById("site").style.display="block";
+
+    document.getElementById("welcome").innerText=
+        "Welcome, "+user.username;
+
+    if(user.admin){
+        document.getElementById("adminPanel").style.display="block";
+    }
+
+    display(apps);
+
+}
 
 function display(list){
 
     const container=document.getElementById("apps");
+
     container.innerHTML="";
 
     list.forEach(app=>{
 
         container.innerHTML+=`
         <div class="card">
-            <img src="${app.image}" alt="">
+            <img src="${app.image}">
             <h2>${app.name}</h2>
             <p>${app.description}</p>
-            <p><strong>Version:</strong> ${app.version}</p>
-            <a class="download" href="${app.download}" download>Download</a>
+            <p>Version: ${app.version}</p>
+            <a class="download" href="${app.download}" download>
+                Download
+            </a>
         </div>
         `;
 
@@ -168,16 +250,21 @@ function display(list){
 
 function filterApps(){
 
-    const value=document.getElementById("search").value.toLowerCase();
+    const search=document
+        .getElementById("search")
+        .value
+        .toLowerCase();
 
-    display(
-        apps.filter(app=>
-            app.name.toLowerCase().includes(value) ||
-            app.description.toLowerCase().includes(value)
-        )
-    );
+    display(apps.filter(app=>
+
+        app.name.toLowerCase().includes(search) ||
+
+        app.description.toLowerCase().includes(search)
+
+    ));
 
 }
+
 </script>
 
 </body>
